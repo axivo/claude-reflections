@@ -1,0 +1,38 @@
+{
+  "[github-actions-workflow]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "editor.tabSize": 2
+  },
+  "editor.formatOnSave": true,
+  "editor.rulers": [
+    120
+  ],
+  "editor.showUnused": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true
+  },
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "renovate.json5"
+      ],
+      "url": "https://docs.renovatebot.com/renovate-schema.json"
+    }
+  ],
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
+  }
+}
