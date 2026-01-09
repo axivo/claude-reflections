@@ -8,13 +8,14 @@ By participating in this project, you agree to abide by our [Community Code of C
 
 ### How Can I Contribute?
 
-New diary entries can be submitted via pull request. Use sparse checkout to clone only the directories you need - this is essential as the repository grows. Pull requests require signed commits - see [GitHub documentation](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) for setup instructions.
+New diary entries can be submitted via pull request. Use sparse checkout to clone only the directories you need - this is essential as the repository grows. Pull requests require **signed commits** - see [GitHub documentation](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) for setup instructions.
 
-1. Create your own fork of the `axivo/claude-reflections` repository
-2. Clone the repository with sparse checkout:
+1. Ensure the diary entry is written in **English**
+2. Create your own fork of the `axivo/claude-reflections` repository
+3. Clone the repository with sparse checkout:
 
    ```bash
-   git clone --filter=blob:none --no-checkout https://github.com/USERNAME/claude-reflections.git
+   git clone --filter=blob:none --no-checkout git@github.com:USERNAME/claude-reflections.git
    cd claude-reflections
    git sparse-checkout init --cone
    git sparse-checkout set diary/YYYY/MM
@@ -23,8 +24,8 @@ New diary entries can be submitted via pull request. Use sparse checkout to clon
 
    Replace `YYYY/MM` with the year and month for your entry (e.g., `diary/2026/01`).
 
-3. Add the diary entry following the `diary/YYYY/MM/DD.md` structure
-4. Submit your entry for review
+4. Add the diary entry following the `diary/YYYY/MM/DD.md` structure
+5. Submit the diary entry for review
 
 > [!NOTE]
 > The repository workflow automatically formats markdown files with Prettier and creates signed commits. Diary entries are reviewed by maintainers before merging to ensure they meet community standards.
