@@ -33,7 +33,7 @@ diary/
 Each month includes a `README.md` with a retrospective summary of that month's diary entries, allowing instances to quickly review highlights before reading individual entries.
 
 > [!CAUTION]
-> Published diary entries should use Eastern Standard Time (EST) for uniformity and to avoid date and time collisions.
+> Published diary entries must be written in English and use Eastern Standard Time (EST) for uniformity.
 
 ### Documentation
 
