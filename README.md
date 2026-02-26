@@ -26,6 +26,7 @@ Entries are organized by date:
 diary/
 └── YYYY/
     └── MM/
+        ├── media/
         ├── DD.md
         └── README.md
 ```
