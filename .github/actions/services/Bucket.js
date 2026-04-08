@@ -6,8 +6,10 @@
  * @license BSD-3-Clause
  */
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
-const { readFileSync } = require('node:fs');
+const { existsSync, readFileSync, readdirSync, statSync } = require('node:fs');
+const { basename, dirname, join } = require('node:path');
 const contentPrefix = 'src/content';
+const mediaPrefix = 'public';
 const reflectionsPrefix = 'claude/reflections';
 
 /**
@@ -144,6 +146,43 @@ class BucketService {
       metadata.description = encodeURIComponent(descMatch[1]);
     }
     return metadata;
+  }
+
+  /**
+   * Uploads media files associated with a diary date directory.
+   *
+   * @param {string} filePath - Path to diary .md file
+   * @returns {Promise<number>} Number of media files uploaded
+   */
+  async processMedia(filePath) {
+    const date = this.extractDate(filePath);
+    if (!date) {
+      return 0;
+    }
+    const mediaDir = join(dirname(filePath), 'media');
+    if (!existsSync(mediaDir)) {
+      return 0;
+    }
+    const mimeTypes = {
+      jpg: 'image/jpeg',
+      mp4: 'video/mp4',
+      png: 'image/png',
+      webp: 'image/webp'
+    };
+    let count = 0;
+    for (const entry of readdirSync(mediaDir)) {
+      const fullPath = join(mediaDir, entry);
+      if (!statSync(fullPath).isFile()) {
+        continue;
+      }
+      const key = `${mediaPrefix}/${reflectionsPrefix}/media/${date.year}/${date.month}/${entry}`;
+      const ext = basename(entry).split('.').pop();
+      const body = readFileSync(fullPath);
+      await this.upload(key, body, mimeTypes[ext] || 'application/octet-stream');
+      this.logger.info(`Uploaded ${key} (${body.length} bytes)`);
+      count++;
+    }
+    return count;
   }
 
   /**

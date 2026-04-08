@@ -83,11 +83,23 @@ class WorkflowHandler extends Action {
       const updatedFiles = await this.gitHubService.getUpdatedFiles();
       const diaryFiles = updatedFiles.filter(file => file.match(/^diary\/\d{4}\/\d{2}\/\d{2}\.md$/));
       let totalEntries = 0;
+      let totalMedia = 0;
+      const processedDirs = new Set();
       for (const file of diaryFiles) {
         const count = await this.bucketService.processFile(file);
         totalEntries += count;
+        const dirKey = file.replace(/\/\d{2}\.md$/, '');
+        if (!processedDirs.has(dirKey)) {
+          processedDirs.add(dirKey);
+          const mediaCount = await this.bucketService.processMedia(file);
+          totalMedia += mediaCount;
+        }
       }
-      this.logger.info(`Uploaded ${totalEntries} entries from ${diaryFiles.length} diary files`);
+      let message = `Uploaded ${totalEntries} entries from ${diaryFiles.length} diary files`;
+      if (totalMedia) {
+        message = `Uploaded ${totalEntries} entries and ${totalMedia} media from ${diaryFiles.length} diary files`;
+      }
+      this.logger.info(message);
     });
   }
 
@@ -109,7 +121,9 @@ class WorkflowHandler extends Action {
         }
       );
       let message = 'No workflow issues to report';
-      if (issue) message = 'Successfully reported workflow issue';
+      if (issue) {
+        message = 'Successfully reported workflow issue';
+      }
       this.logger.info(`${message}`);
     }, false);
   }
