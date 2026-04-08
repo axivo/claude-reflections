@@ -40,17 +40,18 @@ class BucketService {
   }
 
   /**
-   * Builds the full MDX file content for an entry
+   * Builds the renderable MDX content for an entry.
+   * Excludes frontmatter since it is stored as R2 custom metadata.
    *
    * @param {Object} entry - Extracted entry
-   * @returns {string} Complete MDX content
+   * @returns {string} MDX content body
    */
   buildMdx(entry) {
-    const parts = ['---', entry.frontmatter, '---'];
+    const parts = [];
     if (entry.imports) {
-      parts.push('', entry.imports);
+      parts.push(entry.imports, '');
     }
-    parts.push('', `# ${entry.title}`, '', entry.body, '');
+    parts.push(`# ${entry.title}`, '', entry.body, '');
     return parts.join('\n');
   }
 
