@@ -6,7 +6,7 @@
  * @license BSD-3-Clause
  */
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
-const GithubSlugger = require('github-slugger');
+const { slug: githubSlug } = require('github-slugger');
 const { existsSync, readFileSync, readdirSync, statSync } = require('node:fs');
 const { basename, dirname, join } = require('node:path');
 const contentPrefix = 'src/content';
@@ -222,8 +222,7 @@ class BucketService {
    * @returns {string} URL-safe slug
    */
   slugify(title) {
-    const slugger = new GithubSlugger();
-    return slugger.slug(title);
+    return githubSlug(title);
   }
 
   /**
