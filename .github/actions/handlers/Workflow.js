@@ -79,7 +79,7 @@ class WorkflowHandler extends Action {
    */
   async uploadEntries() {
     return this.execute('upload entries', async () => {
-      this.logger.info('Uploading entries to R2...');
+      this.logger.info('Uploading entries to R2 bucket...');
       const updatedFiles = await this.gitHubService.getUpdatedFiles();
       const diaryFiles = updatedFiles.filter(file => file.match(/^diary\/\d{4}\/\d{2}\/\d{2}\.md$/));
       let totalEntries = 0;
