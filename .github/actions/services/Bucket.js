@@ -139,7 +139,7 @@ class BucketService {
     }
     const descMatch = frontmatter.match(/description: >-\n\s+(.+)/);
     if (descMatch) {
-      metadata.description = descMatch[1];
+      metadata.description = descMatch[1].replace(/\u2014/g, '--').replace(/\u2013/g, '-');
     }
     return metadata;
   }
