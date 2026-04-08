@@ -7,7 +7,8 @@
  */
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { readFileSync } = require('node:fs');
-const contentPrefix = 'src/content/claude/reflections';
+const contentPrefix = 'src/content';
+const reflectionsPrefix = 'claude/reflections';
 
 /**
  * Bucket storage service for uploading reflection entries
@@ -110,7 +111,8 @@ class BucketService {
         }
         return componentLines.join('\n');
       });
-      entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/media\//g, '/claude/reflections/media/$1/$2/');
+      entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/(\d{2})\.md/g, `/${reflectionsPrefix}/$1/$2/$3`);
+      entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/media\//g, `/${reflectionsPrefix}/media/$1/$2/`);
       entryContent = entryContent.replace(/\n{3,}/g, '\n\n').trim();
       entries.push({ frontmatter: fm, slug, title, body: entryContent, imports: imports.trim() });
     }
@@ -162,7 +164,7 @@ class BucketService {
     }
     let count = 0;
     for (const entry of entries) {
-      const key = `${contentPrefix}/${date.year}/${date.month}/${date.day}/${entry.slug}.mdx`;
+      const key = `${contentPrefix}/${reflectionsPrefix}/${date.year}/${date.month}/${date.day}/${entry.slug}.mdx`;
       const mdx = this.buildMdx(entry);
       const metadata = this.parseMetadata(entry.frontmatter);
       await this.upload(key, mdx, 'text/plain', metadata);

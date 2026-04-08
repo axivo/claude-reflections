@@ -51,7 +51,7 @@ jobs:
             const workflow = new Workflow({ github, context, core, exec });
             await workflow.processEntries();
 
-      - name: Upload entries to R2
+      - name: Upload entries to R2 bucket
         uses: actions/github-script@v8
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
