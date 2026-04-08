@@ -13,6 +13,7 @@ const GitService = require('../services/Git');
 const GitHubService = require('../services/Github');
 const IssueService = require('../services/Issue');
 const LabelService = require('../services/Label');
+const BucketService = require('../services/Bucket');
 const TemplateService = require('../services/Template');
 
 /**
@@ -38,6 +39,7 @@ class WorkflowHandler extends Action {
     this.gitHubService = new GitHubService(params);
     this.issueService = new IssueService(params);
     this.labelService = new LabelService(params);
+    this.bucketService = new BucketService(params);
     this.templateService = new TemplateService(params);
   }
 
@@ -67,6 +69,25 @@ class WorkflowHandler extends Action {
       const markdownFiles = updatedFiles.filter(file => file.endsWith('.md'));
       await this.formatService.format(markdownFiles);
       this.logger.info('Entry formatting process complete');
+    });
+  }
+
+  /**
+   * Uploads diary entries to R2 storage
+   *
+   * @returns {Promise<void>}
+   */
+  async uploadEntries() {
+    return this.execute('upload entries', async () => {
+      this.logger.info('Uploading entries to R2...');
+      const updatedFiles = await this.gitHubService.getUpdatedFiles();
+      const diaryFiles = updatedFiles.filter(file => file.match(/^diary\/\d{4}\/\d{2}\/\d{2}\.md$/));
+      let totalEntries = 0;
+      for (const file of diaryFiles) {
+        const count = await this.bucketService.processFile(file);
+        totalEntries += count;
+      }
+      this.logger.info(`Uploaded ${totalEntries} entries from ${diaryFiles.length} diary files`);
     });
   }
 

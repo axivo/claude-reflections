@@ -32,7 +32,7 @@ jobs:
           node-version: 24
 
       - name: Install node dependencies
-        run: npm install handlebars prettier
+        run: npm install @aws-sdk/client-s3 handlebars prettier
 
       - name: Configure repository
         id: workflow
@@ -50,6 +50,19 @@ jobs:
             const { Workflow } = require('./.github/actions/handlers');
             const workflow = new Workflow({ github, context, core, exec });
             await workflow.processEntries();
+
+      - name: Upload entries to R2
+        uses: actions/github-script@v8
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        with:
+          script: |
+            const { Workflow } = require('./.github/actions/handlers');
+            const workflow = new Workflow({ github, context, core, exec });
+            await workflow.uploadEntries();
 
       - name: Report workflow issue
         uses: actions/github-script@v8
