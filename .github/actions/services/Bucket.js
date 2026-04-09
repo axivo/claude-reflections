@@ -140,12 +140,18 @@ class BucketService {
    */
   parseMetadata(frontmatter, filePath) {
     const metadata = {};
+    const metadataKeys = ['author', 'date', 'source', 'template', 'title'];
     const lines = frontmatter.split('\n');
     for (const line of lines) {
       const match = line.match(/^(\w+): (.+)$/);
       if (match && !['description', 'tags'].includes(match[1])) {
         metadata[match[1]] = match[2];
       }
+    }
+    const missingKeys = metadataKeys.filter(key => !metadata[key]);
+    if (missingKeys.length) {
+      const word = missingKeys.length === 1 ? 'key' : 'keys';
+      throw new Error(`Missing metadata ${word} (${missingKeys.map(k => `"${k}"`).join(', ')}) in "${metadata.title}" entry (${filePath})`);
     }
     const tagsMatch = frontmatter.match(/tags:\n([\s\S]*?)(?:\n\w|$)/);
     if (tagsMatch) {
@@ -154,11 +160,10 @@ class BucketService {
     }
     const descriptionMatch = frontmatter.match(/description: >-\n\s+(.+)/);
     if (descriptionMatch) {
-      const encodedDescription = encodeURIComponent(descriptionMatch[1]);
-      if (encodedDescription.length > 1024) {
-        throw new Error(`Metadata "description" field exceeds 1024 bytes (${encodedDescription.length} bytes) in "${metadata.title}" entry (${filePath})`);
+      metadata.description = encodeURIComponent(descriptionMatch[1]);
+      if (metadata.description.length > 1024) {
+        throw new Error(`Metadata "description" key exceeds 1024 bytes (${metadata.description.length} bytes) in "${metadata.title}" entry (${filePath})`);
       }
-      metadata.description = encodedDescription;
     }
     return metadata;
   }
