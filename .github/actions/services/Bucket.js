@@ -156,7 +156,7 @@ class BucketService {
     if (descriptionMatch) {
       const encodedDescription = encodeURIComponent(descriptionMatch[1]);
       if (encodedDescription.length > 1024) {
-        throw new Error(`Description exceeds 1024 bytes (${encodedDescription.length} bytes) in "${metadata.title}" (${filePath})`);
+        throw new Error(`Metadata "description" field exceeds 1024 bytes (${encodedDescription.length} bytes) in "${metadata.title}" entry (${filePath})`);
       }
       metadata.description = encodedDescription;
     }
