@@ -77,6 +77,13 @@ class BucketService {
    * @returns {Array<{ frontmatter: string, slug: string, title: string, body: string, imports: string }>}
    */
   extractEntries(content) {
+    const uuidPattern = /<!--mdx-frontmatter-([^\n]+)\n/g;
+    const validUuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+    for (const match of content.matchAll(uuidPattern)) {
+      if (!validUuid.test(match[1])) {
+        throw new Error(`Invalid UUID "${match[1]}" in <!--mdx-frontmatter--> block`);
+      }
+    }
     const frontmatterPattern = /<!--mdx-frontmatter-[a-f0-9-]+\n([\s\S]*?)-->/g;
     const frontmatters = [...content.matchAll(frontmatterPattern)];
     if (frontmatters.length === 0) {
