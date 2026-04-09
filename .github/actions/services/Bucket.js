@@ -74,14 +74,15 @@ class BucketService {
    * Extracts entries from a diary file using mdx comment blocks
    *
    * @param {string} content - Raw diary file content
+   * @param {string} filePath - Path to diary file for error reporting
    * @returns {Array<{ frontmatter: string, slug: string, title: string, body: string, imports: string }>}
    */
-  extractEntries(content) {
+  extractEntries(content, filePath) {
     const uuidPattern = /<!--mdx-frontmatter-([^\n]+)\n/g;
     const validUuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
     for (const match of content.matchAll(uuidPattern)) {
       if (!validUuid.test(match[1])) {
-        throw new Error(`Invalid UUID "${match[1]}" in <!--mdx-frontmatter--> block`);
+        throw new Error(`Invalid UUID "${match[1]}" in <!--mdx-frontmatter--> block (${filePath})`);
       }
     }
     const frontmatterPattern = /<!--mdx-frontmatter-[a-f0-9-]+\n([\s\S]*?)-->/g;
@@ -134,9 +135,10 @@ class BucketService {
    * Parses frontmatter string into metadata object for R2 custom metadata
    *
    * @param {string} frontmatter - YAML frontmatter string
+   * @param {string} filePath - Path to diary file for error reporting
    * @returns {Object} Metadata key-value pairs
    */
-  parseMetadata(frontmatter) {
+  parseMetadata(frontmatter, filePath) {
     const metadata = {};
     const lines = frontmatter.split('\n');
     for (const line of lines) {
@@ -147,12 +149,16 @@ class BucketService {
     }
     const tagsMatch = frontmatter.match(/tags:\n([\s\S]*?)(?:\n\w|$)/);
     if (tagsMatch) {
-      const tagList = tagsMatch[1].trim().split('\n').map(t => t.replace(/^\s*- /, ''));
+      const tagList = tagsMatch[1].trim().split('\n').map(t => t.replace(/^\s*- #?/, '').replace(/-/g, '_'));
       metadata.tags = JSON.stringify(tagList);
     }
-    const descMatch = frontmatter.match(/description: >-\n\s+(.+)/);
-    if (descMatch) {
-      metadata.description = encodeURIComponent(descMatch[1]);
+    const descriptionMatch = frontmatter.match(/description: >-\n\s+(.+)/);
+    if (descriptionMatch) {
+      const encodedDescription = encodeURIComponent(descriptionMatch[1]);
+      if (encodedDescription.length > 1024) {
+        throw new Error(`Description exceeds 1024 bytes (${encodedDescription.length} bytes) in "${metadata.title}" (${filePath})`);
+      }
+      metadata.description = encodedDescription;
     }
     return metadata;
   }
@@ -206,7 +212,7 @@ class BucketService {
       return 0;
     }
     const content = readFileSync(filePath, 'utf-8');
-    const entries = this.extractEntries(content);
+    const entries = this.extractEntries(content, filePath);
     if (entries.length === 0) {
       return 0;
     }
@@ -214,7 +220,7 @@ class BucketService {
     for (const entry of entries) {
       const key = `${contentPrefix}/${reflectionsPrefix}/${date.year}/${date.month}/${date.day}/${entry.slug}.mdx`;
       const mdx = this.buildMdx(entry);
-      const metadata = this.parseMetadata(entry.frontmatter);
+      const metadata = this.parseMetadata(entry.frontmatter, filePath);
       await this.upload(key, mdx, 'text/plain', metadata);
       this.logger.info(`Uploaded ${key} (${mdx.length} bytes)`);
       count++;
