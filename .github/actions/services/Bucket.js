@@ -161,9 +161,15 @@ class BucketService {
     const descriptionMatch = frontmatter.match(/description: >-\n\s+(.+)/);
     if (descriptionMatch) {
       metadata.description = encodeURIComponent(descriptionMatch[1]);
-      if (metadata.description.length > 1024) {
-        throw new Error(`Metadata "description" key exceeds 1024 bytes (${metadata.description.length} bytes) in "${metadata.title}" entry (${filePath})`);
+    }
+    for (const [key, value] of Object.entries(metadata)) {
+      if (value.length > 2048) {
+        throw new Error(`Metadata "${key}" key exceeds 2048 bytes (${value.length} bytes) in "${metadata.title}" entry (${filePath})`);
       }
+    }
+    const totalBytes = Object.values(metadata).reduce((sum, value) => sum + value.length, 0);
+    if (totalBytes > 8192) {
+      throw new Error(`Total metadata exceeds 8192 bytes (${totalBytes} bytes) in "${metadata.title}" entry (${filePath})`);
     }
     return metadata;
   }
