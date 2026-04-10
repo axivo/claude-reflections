@@ -2,7 +2,6 @@ name: Reflection
 
 on:
   pull_request:
-    types: [closed, opened, reopened, synchronize]
     paths:
       - diary/**/*.md
 
@@ -21,7 +20,6 @@ permissions:
 
 jobs:
   format:
-    if: github.event.pull_request.merged != true
     name: Format
     runs-on: ubuntu-latest
     steps:
@@ -53,31 +51,6 @@ jobs:
             const workflow = new Workflow({ github, context, core, exec });
             await workflow.processEntries();
 
-      - name: Report workflow issue
-        uses: actions/github-script@v9
-        if: always()
-        with:
-          script: |
-            const { Workflow } = require('./.github/actions/handlers');
-            const workflow = new Workflow({ github, context, core, exec });
-            await workflow.reportIssue();
-
-  deploy:
-    if: github.event.pull_request.merged == true
-    name: Deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Install node dependencies
-        run: npm install @aws-sdk/client-s3 github-slugger
-
       - name: Upload entries to R2 bucket
         uses: actions/github-script@v9
         env:
@@ -90,3 +63,12 @@ jobs:
             const { Workflow } = require('./.github/actions/handlers');
             const workflow = new Workflow({ github, context, core, exec });
             await workflow.uploadEntries();
+
+      - name: Report workflow issue
+        uses: actions/github-script@v9
+        if: always()
+        with:
+          script: |
+            const { Workflow } = require('./.github/actions/handlers');
+            const workflow = new Workflow({ github, context, core, exec });
+            await workflow.reportIssue();
