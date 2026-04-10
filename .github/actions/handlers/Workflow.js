@@ -57,23 +57,6 @@ class WorkflowHandler extends Action {
   }
 
   /**
-   * Triggers a website build via the Cloudflare deploy hook
-   *
-   * @returns {Promise<void>}
-   */
-  async deployEntries() {
-    return this.execute('deploy entries', async () => {
-      this.logger.info('Triggering website build...');
-      const response = await fetch(process.env.DEPLOY_HOOK_URL, { method: 'POST' });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Deploy hook returned ${response.status}: ${text}`);
-      }
-      this.logger.info('Website build triggered successfully');
-    });
-  }
-
-  /**
    * Formats entries and optionally updates labels
    *
    * @returns {Promise<void>}

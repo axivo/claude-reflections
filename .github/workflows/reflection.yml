@@ -90,13 +90,3 @@ jobs:
             const { Workflow } = require('./.github/actions/handlers');
             const workflow = new Workflow({ github, context, core, exec });
             await workflow.uploadEntries();
-
-      - name: Deploy entries
-        uses: actions/github-script@v9
-        env:
-          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
-        with:
-          script: |
-            const { Workflow } = require('./.github/actions/handlers');
-            const workflow = new Workflow({ github, context, core, exec });
-            await workflow.deployEntries();
