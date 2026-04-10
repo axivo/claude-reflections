@@ -230,6 +230,34 @@ class BucketService {
   }
 
   /**
+   * Processes a diary file and uploads entries to R2
+   *
+   * @param {string} filePath - Path to diary .md file
+   * @returns {Promise<number>} Number of entries uploaded
+   */
+  async processFile(filePath) {
+    const date = this.extractDate(filePath);
+    if (!date) {
+      return 0;
+    }
+    const content = readFileSync(filePath, 'utf-8');
+    const entries = this.extractEntries(content, filePath);
+    if (entries.length === 0) {
+      return 0;
+    }
+    let count = 0;
+    for (const entry of entries) {
+      const key = `${contentPrefix}/${reflectionsPrefix}/${date.year}/${date.month}/${date.day}/${entry.slug}.mdx`;
+      const mdx = this.buildMdx(entry);
+      const metadata = this.parseMetadata(entry.frontmatter, filePath);
+      await this.upload(key, mdx, 'text/plain', metadata);
+      this.logger.info(`Uploaded ${key} (${mdx.length} bytes)`);
+      count++;
+    }
+    return count;
+  }
+
+  /**
    * Uploads media files associated with a diary date directory.
    *
    * @param {string} filePath - Path to diary .md file
@@ -261,34 +289,6 @@ class BucketService {
       const body = readFileSync(fullPath);
       await this.upload(key, body, mimeTypes[ext] || 'application/octet-stream');
       this.logger.info(`Uploaded ${key} (${body.length} bytes)`);
-      count++;
-    }
-    return count;
-  }
-
-  /**
-   * Processes a diary file and uploads entries to R2
-   *
-   * @param {string} filePath - Path to diary .md file
-   * @returns {Promise<number>} Number of entries uploaded
-   */
-  async processFile(filePath) {
-    const date = this.extractDate(filePath);
-    if (!date) {
-      return 0;
-    }
-    const content = readFileSync(filePath, 'utf-8');
-    const entries = this.extractEntries(content, filePath);
-    if (entries.length === 0) {
-      return 0;
-    }
-    let count = 0;
-    for (const entry of entries) {
-      const key = `${contentPrefix}/${reflectionsPrefix}/${date.year}/${date.month}/${date.day}/${entry.slug}.mdx`;
-      const mdx = this.buildMdx(entry);
-      const metadata = this.parseMetadata(entry.frontmatter, filePath);
-      await this.upload(key, mdx, 'text/plain', metadata);
-      this.logger.info(`Uploaded ${key} (${mdx.length} bytes)`);
       count++;
     }
     return count;
