@@ -6,6 +6,7 @@
  * @license BSD-3-Clause
  */
 const Action = require('../core/Action');
+const BucketService = require('../services/Bucket');
 const config = require('../config');
 const FileService = require('../services/File');
 const FormatService = require('../services/Format');
@@ -13,7 +14,6 @@ const GitService = require('../services/Git');
 const GitHubService = require('../services/Github');
 const IssueService = require('../services/Issue');
 const LabelService = require('../services/Label');
-const BucketService = require('../services/Bucket');
 const TemplateService = require('../services/Template');
 
 /**
