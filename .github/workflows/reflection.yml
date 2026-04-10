@@ -19,8 +19,8 @@ permissions:
   issues: write
 
 jobs:
-  format:
-    name: Format
+  update:
+    name: Update
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
