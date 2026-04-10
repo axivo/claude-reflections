@@ -124,7 +124,7 @@ class BucketService {
         return componentLines.join('\n');
       });
       entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/(\d{2})\.md/g, `/${reflectionsPrefix}/$1/$2/$3`);
-      entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/media\//g, `/${reflectionsPrefix}/diary/$1/$2/media/`);
+      entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/media\//g, `/${reflectionsPrefix}/$1/$2/`);
       entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})(?!\/)/g, `/${reflectionsPrefix}/$1/$2`);
       entryContent = entryContent.replace(/\/diary\/(\d{4})(?!\/)/g, `/${reflectionsPrefix}/$1`);
       entryContent = entryContent.replace(/\n{3,}/g, '\n\n').trim();
@@ -204,7 +204,7 @@ class BucketService {
       if (!statSync(fullPath).isFile()) {
         continue;
       }
-      const key = `${mediaPrefix}/${reflectionsPrefix}/diary/${date.year}/${date.month}/media/${entry}`;
+      const key = `${mediaPrefix}/${reflectionsPrefix}/${date.year}/${date.month}/${entry}`;
       const ext = basename(entry).split('.').pop();
       const body = readFileSync(fullPath);
       await this.upload(key, body, mimeTypes[ext] || 'application/octet-stream');
