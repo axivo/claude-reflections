@@ -5,7 +5,7 @@
  * @author AXIVO
  * @license BSD-3-Clause
  */
-const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
+const { DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { slug: githubSlug } = require('github-slugger');
 const { existsSync, readFileSync, readdirSync, statSync } = require('node:fs');
 const { basename, dirname, join } = require('node:path');
@@ -54,6 +54,58 @@ class BucketService {
     }
     parts.push(`# ${entry.title}`, '', entry.body, '');
     return parts.join('\n');
+  }
+
+  /**
+   * Deletes all R2 objects under the prefix derived from a diary file path
+   *
+   * @param {string} filePath - Path like diary/2025/12/01.md
+   * @returns {Promise<number>} Number of entries deleted
+   */
+  async deleteFile(filePath) {
+    const date = this.extractDate(filePath);
+    if (!date) {
+      return 0;
+    }
+    const prefix = `${contentPrefix}/${reflectionsPrefix}/${date.year}/${date.month}/${date.day}/`;
+    const list = await this.s3.send(new ListObjectsV2Command({
+      Bucket: this.bucket,
+      Prefix: prefix
+    }));
+    const objects = list.Contents || [];
+    if (!objects.length) {
+      return 0;
+    }
+    await this.s3.send(new DeleteObjectsCommand({
+      Bucket: this.bucket,
+      Delete: {
+        Objects: objects.map(object => ({ Key: object.Key }))
+      }
+    }));
+    for (const object of objects) {
+      this.logger.info(`Deleted ${object.Key}`);
+    }
+    return objects.length;
+  }
+
+  /**
+   * Deletes a single media R2 object derived from a diary media file path
+   *
+   * @param {string} filePath - Path like diary/2025/12/media/14-first-light.webp
+   * @returns {Promise<number>} 1 if deleted, 0 otherwise
+   */
+  async deleteMedia(filePath) {
+    const match = filePath.match(/diary\/(\d{4})\/(\d{2})\/media\/(.+)$/);
+    if (!match) {
+      return 0;
+    }
+    const key = `${mediaPrefix}/${reflectionsPrefix}/${match[1]}/${match[2]}/${match[3]}`;
+    await this.s3.send(new DeleteObjectCommand({
+      Bucket: this.bucket,
+      Key: key
+    }));
+    this.logger.info(`Deleted ${key}`);
+    return 1;
   }
 
   /**

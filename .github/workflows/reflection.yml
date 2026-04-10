@@ -51,7 +51,7 @@ jobs:
             const workflow = new Workflow({ github, context, core, exec });
             await workflow.processEntries();
 
-      - name: Upload entries to R2 bucket
+      - name: Update entries in R2 bucket
         uses: actions/github-script@v9
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -62,7 +62,7 @@ jobs:
           script: |
             const { Workflow } = require('./.github/actions/handlers');
             const workflow = new Workflow({ github, context, core, exec });
-            await workflow.uploadEntries();
+            await workflow.updateEntries();
 
       - name: Report workflow issue
         uses: actions/github-script@v9

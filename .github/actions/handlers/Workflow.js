@@ -66,38 +66,60 @@ class WorkflowHandler extends Action {
       if (this.config.get('issue.updateLabels')) await this.labelService.update();
       this.logger.info('Formatting entries...');
       const updatedFiles = await this.gitHubService.getUpdatedFiles();
-      const markdownFiles = updatedFiles.filter(file => file.endsWith('.md'));
+      const markdownFiles = updatedFiles
+        .filter(file => file.status !== 'removed' && file.filename.endsWith('.md'))
+        .map(file => file.filename);
       await this.formatService.format(markdownFiles);
       this.logger.info('Entry formatting process complete');
     });
   }
 
   /**
-   * Uploads diary entries to R2 storage
+   * Synchronizes diary entries and media with R2 storage
    *
    * @returns {Promise<void>}
    */
-  async uploadEntries() {
-    return this.execute('upload all entries', async () => {
-      this.logger.info('Uploading entries to R2 bucket...');
+  async updateEntries() {
+    return this.execute('update all entries', async () => {
+      this.logger.info('Updating entries in R2 bucket...');
       const updatedFiles = await this.gitHubService.getUpdatedFiles();
-      const diaryFiles = updatedFiles.filter(file => file.match(/^diary\/\d{4}\/\d{2}\/\d{2}\.md$/));
+      const diaryPattern = /^diary\/\d{4}\/\d{2}\/\d{2}\.md$/;
+      const mediaPattern = /^diary\/\d{4}\/\d{2}\/media\//;
       let totalEntries = 0;
       let totalMedia = 0;
+      const diaryFiles = new Set();
       const processedDirs = new Set();
-      for (const file of diaryFiles) {
-        const count = await this.bucketService.processFile(file);
-        totalEntries += count;
-        const dirKey = file.replace(/\/\d{2}\.md$/, '');
-        if (!processedDirs.has(dirKey)) {
-          processedDirs.add(dirKey);
-          const mediaCount = await this.bucketService.processMedia(file);
-          totalMedia += mediaCount;
+      for (const file of updatedFiles) {
+        if (file.status === 'removed' && diaryPattern.test(file.filename)) {
+          totalEntries += await this.bucketService.deleteFile(file.filename);
+          diaryFiles.add(file.filename);
+          continue;
+        }
+        if (file.status === 'removed' && mediaPattern.test(file.filename)) {
+          totalMedia += await this.bucketService.deleteMedia(file.filename);
+          continue;
+        }
+        if (file.status === 'renamed' && file.previousFilename && diaryPattern.test(file.previousFilename)) {
+          totalEntries += await this.bucketService.deleteFile(file.previousFilename);
+        }
+        if (file.status === 'renamed' && file.previousFilename && mediaPattern.test(file.previousFilename)) {
+          totalMedia += await this.bucketService.deleteMedia(file.previousFilename);
+        }
+        if (diaryPattern.test(file.filename)) {
+          totalEntries += await this.bucketService.processFile(file.filename);
+          diaryFiles.add(file.filename);
+          const dirKey = file.filename.replace(/\/\d{2}\.md$/, '');
+          if (!processedDirs.has(dirKey)) {
+            processedDirs.add(dirKey);
+            totalMedia += await this.bucketService.processMedia(file.filename);
+          }
         }
       }
-      let message = `Uploaded ${totalEntries} entries from ${diaryFiles.length} diary files`;
+      const wordEntries = totalEntries === 1 ? 'entry' : 'entries';
+      const wordFiles = diaryFiles.size === 1 ? 'file' : 'files';
+      let message = `Updated ${totalEntries} ${wordEntries} from ${diaryFiles.size} diary ${wordFiles}`;
       if (totalMedia) {
-        message = `Uploaded ${totalEntries} entries and ${totalMedia} media from ${diaryFiles.length} diary files`;
+        message = `Updated ${totalEntries} ${wordEntries} and ${totalMedia} media from ${diaryFiles.size} diary ${wordFiles}`;
       }
       this.logger.info(message);
     });

@@ -228,7 +228,7 @@ class GitHubService extends Action {
   /**
    * Gets the list of updated files from a pull request
    *
-   * @returns {Promise<Array<string>>} Array of file paths that were changed
+   * @returns {Promise<Array<{filename: string, previousFilename: string|undefined, status: string}>>} Array of file objects with path and status
    */
   async getUpdatedFiles() {
     return this.execute('get updated files', async () => {
@@ -244,7 +244,11 @@ class GitHubService extends Action {
             per_page: 100,
             page
           });
-          files.push(...response.data.map(file => file.filename));
+          files.push(...response.data.map(file => ({
+            filename: file.filename,
+            previousFilename: file.previous_filename,
+            status: file.status
+          })));
           hasMorePages = response.data.length === 100;
           page++;
         }
