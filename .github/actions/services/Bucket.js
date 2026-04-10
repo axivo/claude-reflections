@@ -126,6 +126,7 @@ class BucketService {
       entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/(\d{2})\.md/g, `/${reflectionsPrefix}/$1/$2/$3`);
       entryContent = entryContent.replace(/\/diary\/(\d{4})\/(\d{2})\/media\//g, `/${reflectionsPrefix}/media/$1/$2/`);
       entryContent = entryContent.replace(/\n{3,}/g, '\n\n').trim();
+      entryContent = entryContent.replace(/https:\/\/axivo\.com/g, '');
       entries.push({ frontmatter: fm, slug, title, body: entryContent, imports: imports.trim() });
     }
     return entries;
