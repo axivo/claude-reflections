@@ -36,7 +36,7 @@ jobs:
 
       - name: Configure repository
         id: workflow
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { Workflow } = require('./.github/actions/handlers');
@@ -44,7 +44,7 @@ jobs:
             await workflow.configureRepository();
 
       - name: Process entries
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { Workflow } = require('./.github/actions/handlers');
@@ -52,7 +52,7 @@ jobs:
             await workflow.processEntries();
 
       - name: Report workflow issue
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         if: always()
         with:
           script: |
