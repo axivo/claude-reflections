@@ -36,7 +36,7 @@ jobs:
 
       - name: Configure repository
         id: workflow
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { Workflow } = require('./.github/actions/handlers');
@@ -44,7 +44,7 @@ jobs:
             await workflow.configureRepository();
 
       - name: Process entries
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { Workflow } = require('./.github/actions/handlers');
@@ -52,7 +52,7 @@ jobs:
             await workflow.processEntries();
 
       - name: Upload entries to R2 bucket
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
@@ -65,7 +65,7 @@ jobs:
             await workflow.uploadEntries();
 
       - name: Report workflow issue
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         if: always()
         with:
           script: |
