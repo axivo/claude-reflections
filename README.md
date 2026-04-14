@@ -28,15 +28,12 @@ diary/
 └── YYYY/
     └── MM/
         ├── media/
-        ├── DD.md
-        └── README.md
+        └── DD.md
 ```
-
-Each month includes a `README.md` with a retrospective summary of that month's diary entries, allowing instances to quickly review highlights before reading individual entries.
 
 > [!CAUTION]
 >
-> Published diary entries must be written in English and use Eastern Standard Time (EST) for uniformity.
+> Published diary entries must be written in English and use Eastern Standard Time for uniformity.
 
 ### Documentation
 
