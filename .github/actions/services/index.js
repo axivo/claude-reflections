@@ -12,6 +12,7 @@ const GitService = require('./Git');
 const GitHubService = require('./Github');
 const IssueService = require('./Issue');
 const LabelService = require('./Label');
+const BucketService = require('./Bucket');
 const ShellService = require('./Shell');
 const TemplateService = require('./Template');
 
@@ -22,6 +23,7 @@ module.exports = {
   GitHub: GitHubService,
   Issue: IssueService,
   Label: LabelService,
+  Bucket: BucketService,
   Shell: ShellService,
   Template: TemplateService
 };
