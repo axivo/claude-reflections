@@ -115,11 +115,11 @@ class WorkflowHandler extends Action {
           }
         }
       }
-      const wordEntries = totalEntries === 1 ? 'entry' : 'entries';
-      const wordFiles = diaryFiles.size === 1 ? 'file' : 'files';
-      let message = `Updated ${totalEntries} ${wordEntries} from ${diaryFiles.size} diary ${wordFiles}`;
+      const pluralRules = new Intl.PluralRules('en-US');
+      const plural = (count, singular, pluralForm) => `${count} ${pluralRules.select(count) === 'one' ? singular : pluralForm}`;
+      let message = `Updated ${plural(totalEntries, 'entry', 'entries')} from ${plural(diaryFiles.size, 'diary file', 'diary files')}`;
       if (totalMedia) {
-        message = `Updated ${totalEntries} ${wordEntries} and ${totalMedia} media from ${diaryFiles.size} diary ${wordFiles}`;
+        message = `Updated ${plural(totalEntries, 'entry', 'entries')} and ${plural(totalMedia, 'media file', 'media files')} from ${plural(diaryFiles.size, 'diary file', 'diary files')}`;
       }
       this.logger.info(message);
     });
