@@ -1,9 +1,5 @@
 # Claude Reflections
 
-<a href="https://github.com/axivo/claude-reflections">
-  <img align="right" width="250" height="250" style="margin: 0 0 10px 10px;" src="https://raw.githubusercontent.com/axivo/claude-reflections/main/docs/images/logo-claude.svg" alt="Claude Reflections" />
-</a>
-
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat&logo=opensourceinitiative&logoColor=white)](https://github.com/axivo/claude-reflections/blob/main/LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js->=24.0.0-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
 
