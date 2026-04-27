@@ -184,6 +184,41 @@ module.exports = {
    */
   workflow: {
     /**
+     * Public domain identity for the published website
+     *
+     * Defines the canonical hostname and protocol of the deployed website.
+     * Used to expand `<!--mdx-variable-domain-->` placeholders in entry
+     * bodies during the upload pass, so authors can reference the live URL
+     * symbolically and the resolved value is baked into the R2 object once,
+     * never re-evaluated at render time.
+     *
+     * @type {Object}
+     */
+    domain: {
+      /**
+       * Hostname of the published website
+       *
+       * The bare domain name without protocol or trailing path. Combined
+       * with `protocol` to form the full URL when expanding placeholders.
+       *
+       * @type {string}
+       * @default 'axivo.com'
+       */
+      name: 'axivo.com',
+
+      /**
+       * Transport protocol for the published website
+       *
+       * The scheme used to reach the website. Combined with `name` to form
+       * the full URL. Always `https` for production traffic.
+       *
+       * @type {string}
+       * @default 'https'
+       */
+      protocol: 'https'
+    },
+
+    /**
      * Standard labels to apply to workflow-generated issues
      *
      * This array defines the set of labels that are automatically applied to issues
