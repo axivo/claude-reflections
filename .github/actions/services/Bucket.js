@@ -9,6 +9,7 @@ const { DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command, PutObje
 const { slug: githubSlug } = require('github-slugger');
 const { existsSync, readFileSync, readdirSync, statSync } = require('node:fs');
 const { basename, dirname, join } = require('node:path');
+const config = require('../config');
 const contentPrefix = 'src/content';
 const features = {
   syntax: [
@@ -159,6 +160,10 @@ class BucketService {
     if (frontmatters.length === 0) {
       return [];
     }
+    const domain = config.get('workflow.domain');
+    const variables = {
+      domain: `${domain.protocol}://${domain.name}`
+    };
     const entries = [];
     for (let i = 0; i < frontmatters.length; i++) {
       const fm = frontmatters[i][1].trim();
@@ -182,6 +187,9 @@ class BucketService {
       entryContent = entryContent.replace(/(?<![\w.\/-])\/diary\/(\d{4})(?!\/)/g, `/${reflectionsPrefix}/$1`);
       entryContent = entryContent.replace(/\n{3,}/g, '\n\n').trim();
       entryContent = entryContent.replace(/https:\/\/axivo\.com/g, '');
+      for (const [name, value] of Object.entries(variables)) {
+        entryContent = entryContent.replace(new RegExp(`<!--mdx-variable-${name}-->`, 'g'), value);
+      }
       entries.push({ frontmatter: fm, slug, title, body: entryContent });
     }
     return entries;
