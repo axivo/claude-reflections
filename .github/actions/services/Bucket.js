@@ -305,24 +305,6 @@ class BucketService {
   }
 
   /**
-   * Uploads a single media R2 object derived from a diary media file path
-   *
-   * @param {string} filePath - Path like diary/2025/12/media/14-first-light.webp
-   * @returns {Promise<number>} 1 if uploaded, 0 otherwise
-   */
-  async uploadMedia(filePath) {
-    const match = filePath.match(/diary\/(\d{4})\/(\d{2})\/media\/(.+)$/);
-    if (!match) {
-      return 0;
-    }
-    const key = `${mediaPrefix}/${reflectionsPrefix}/${match[1]}/${match[2]}/${match[3]}`;
-    const body = readFileSync(filePath);
-    await this.upload(key, body, mime.lookup(match[3]) || 'application/octet-stream');
-    this.logger.info(`Uploaded ${key} (${body.length} bytes)`);
-    return 1;
-  }
-
-  /**
    * Generates a URL slug from a title
    *
    * @param {string} title - Entry title
@@ -350,6 +332,24 @@ class BucketService {
       Metadata: metadata
     }));
     return true;
+  }
+
+  /**
+   * Uploads a single media R2 object derived from a diary media file path
+   *
+   * @param {string} filePath - Path like diary/2025/12/media/14-first-light.webp
+   * @returns {Promise<number>} 1 if uploaded, 0 otherwise
+   */
+  async uploadMedia(filePath) {
+    const match = filePath.match(/diary\/(\d{4})\/(\d{2})\/media\/(.+)$/);
+    if (!match) {
+      return 0;
+    }
+    const key = `${mediaPrefix}/${reflectionsPrefix}/${match[1]}/${match[2]}/${match[3]}`;
+    const body = readFileSync(filePath);
+    await this.upload(key, body, mime.lookup(match[3]) || 'application/octet-stream');
+    this.logger.info(`Uploaded ${key} (${body.length} bytes)`);
+    return 1;
   }
 }
 
