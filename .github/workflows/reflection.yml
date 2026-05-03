@@ -3,6 +3,7 @@ name: Reflection
 on:
   pull_request:
     paths:
+      - diary/**/media/**
       - diary/**/*.md
 
 concurrency:
@@ -32,7 +33,8 @@ jobs:
           node-version: 24
 
       - name: Install node dependencies
-        run: npm install @aws-sdk/client-s3 github-slugger handlebars prettier
+        run: npm install @aws-sdk/client-s3 github-slugger handlebars mime-types
+          prettier
 
       - name: Configure repository
         id: workflow
