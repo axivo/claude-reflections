@@ -113,6 +113,10 @@ class WorkflowHandler extends Action {
             processedDirs.add(dirKey);
             totalMedia += await this.bucketService.processMedia(file.filename);
           }
+          continue;
+        }
+        if (mediaPattern.test(file.filename)) {
+          totalMedia += await this.bucketService.uploadMedia(file.filename);
         }
       }
       const pluralRules = new Intl.PluralRules('en-US');

@@ -5,10 +5,11 @@
  * @author AXIVO
  * @license BSD-3-Clause
  */
+const { dirname, join } = require('node:path');
+const { existsSync, readFileSync, readdirSync, statSync } = require('node:fs');
 const { DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { slug: githubSlug } = require('github-slugger');
-const { existsSync, readFileSync, readdirSync, statSync } = require('node:fs');
-const { basename, dirname, join } = require('node:path');
+const mime = require('mime-types');
 const config = require('../config');
 const contentPrefix = 'src/content';
 const features = {
@@ -288,12 +289,6 @@ class BucketService {
     if (!existsSync(mediaDir)) {
       return 0;
     }
-    const mimeTypes = {
-      jpg: 'image/jpeg',
-      mp4: 'video/mp4',
-      png: 'image/png',
-      webp: 'image/webp'
-    };
     let count = 0;
     for (const entry of readdirSync(mediaDir)) {
       const fullPath = join(mediaDir, entry);
@@ -301,13 +296,30 @@ class BucketService {
         continue;
       }
       const key = `${mediaPrefix}/${reflectionsPrefix}/${date.year}/${date.month}/${entry}`;
-      const ext = basename(entry).split('.').pop();
       const body = readFileSync(fullPath);
-      await this.upload(key, body, mimeTypes[ext] || 'application/octet-stream');
+      await this.upload(key, body, mime.lookup(entry) || 'application/octet-stream');
       this.logger.info(`Uploaded ${key} (${body.length} bytes)`);
       count++;
     }
     return count;
+  }
+
+  /**
+   * Uploads a single media R2 object derived from a diary media file path
+   *
+   * @param {string} filePath - Path like diary/2025/12/media/14-first-light.webp
+   * @returns {Promise<number>} 1 if uploaded, 0 otherwise
+   */
+  async uploadMedia(filePath) {
+    const match = filePath.match(/diary\/(\d{4})\/(\d{2})\/media\/(.+)$/);
+    if (!match) {
+      return 0;
+    }
+    const key = `${mediaPrefix}/${reflectionsPrefix}/${match[1]}/${match[2]}/${match[3]}`;
+    const body = readFileSync(filePath);
+    await this.upload(key, body, mime.lookup(match[3]) || 'application/octet-stream');
+    this.logger.info(`Uploaded ${key} (${body.length} bytes)`);
+    return 1;
   }
 
   /**
