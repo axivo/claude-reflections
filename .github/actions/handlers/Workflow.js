@@ -89,6 +89,7 @@ class WorkflowHandler extends Action {
       let totalMedia = 0;
       const diaryFiles = new Set();
       const processedDirs = new Set();
+      const uploadedMedia = new Set();
       for (const file of updatedFiles) {
         if (file.status === 'removed' && diaryPattern.test(file.filename)) {
           totalEntries += await this.bucketService.deleteFile(file.filename);
@@ -111,12 +112,12 @@ class WorkflowHandler extends Action {
           const dirKey = file.filename.replace(/\/\d{2}\.md$/, '');
           if (!processedDirs.has(dirKey)) {
             processedDirs.add(dirKey);
-            totalMedia += await this.bucketService.processMedia(file.filename);
+            totalMedia += await this.bucketService.processMedia(file.filename, uploadedMedia);
           }
           continue;
         }
         if (mediaPattern.test(file.filename)) {
-          totalMedia += await this.bucketService.uploadMedia(file.filename);
+          totalMedia += await this.bucketService.uploadMedia(file.filename, uploadedMedia);
         }
       }
       const pluralRules = new Intl.PluralRules('en-US');
