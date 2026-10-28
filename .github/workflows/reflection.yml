@@ -30,7 +30,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
 
       - name: Install node dependencies
         run: npm install @aws-sdk/client-s3 github-slugger handlebars mime-types
